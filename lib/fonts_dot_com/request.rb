@@ -1,3 +1,5 @@
+require 'net/http'
+
 module FontsDotCom
   class Request
 
@@ -44,7 +46,7 @@ module FontsDotCom
       #maybe_say "about to 'run' this request: \n#{request.inspect}\n"
       #res = request.run
 
-      res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request(req) }
+      res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request(@request) }
 
       # TODO
       #@response = FontsDotCom::Response.new(res)

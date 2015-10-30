@@ -4,13 +4,32 @@ module FontsDotCom
     def self.fire(options)
       self.new(options).run
     end
+   
+    attr_accessor :request, :message, :uri, :original_options
     
     def initialize(options={})
       set_up(options)
     end
 
     def set_up(options={})
+      if options.is_a? String
+        @message = options
+      else
+        @message = options[:message]
+      end
+
       @original_options = options
+
+      @uri = URI(base + message)
+
+      @request = Net::HTTP::Get.new(uri)
+      
+      # Compute md5 HMAC for request
+      @auth_param = FontsDotCom::AuthParam.create @message
+      
+      # Set request headers
+      @request['Authorization'] = @auth_param
+      @request['AppKey'] = FontsDotCom::Config.app_key
 
       # TODO
       #
@@ -23,8 +42,9 @@ module FontsDotCom
 
     def run(attempted_authentication=false)
       #maybe_say "about to 'run' this request: \n#{request.inspect}\n"
+      #res = request.run
 
-      res = request.run
+      res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request(req) }
 
       # TODO
       #@response = FontsDotCom::Response.new(res)
@@ -47,6 +67,10 @@ module FontsDotCom
         clientCode:   config[:clientCode],
         requests:     requests 
       }
+    end
+    
+    def base
+      "#{protocol}://api.fonts.com/"
     end
     
     def base_uri

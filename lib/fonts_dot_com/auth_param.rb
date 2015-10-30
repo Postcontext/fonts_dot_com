@@ -11,26 +11,33 @@ module FontsDotCom
       self.new(message).compute
     end
   
-    attr_accessor :message, :param
+    attr_accessor :message, :param, :digest, :hasher, :concatenation, :hash, :hash64, :auth
     
     def initialize(message)
       @message = message
+      @digest = OpenSSL::Digest.new('md5')
+      @hasher = OpenSSL::HMAC.new(priv_key, @digest)
+      @concatenation = "#{pub_key}|#{message}"
     end
 
     def compute
-      pub_key  = FontsDotCom::Config.public_key
-      priv_key = FontsDotCom::Config.private_key
-
-      #digest = OpenSSL::Digest::Digest.new('md5')
-      digest = OpenSSL::Digest.new('md5')
+      hasher.update(concatenation)
+      @hash = hasher.to_s
       
-      hash   = OpenSSL::HMAC.digest(digest, priv_key, "#{pub_key}|#{message}")
-      hash64 = Base64.encode64(hash)
-      auth   = "#{pub_key}:#{hash64}"
-      
-      @param = URI.encode(auth)
+      # Convert hash from hex to base 64
+      @hash64 = [[@hash].pack("H*")].pack("m0")
+      @auth   = "#{pub_key}:#{@hash64}"
+      @param  = URI.encode(@auth)
       
       return @param
+    end
+
+    def pub_key
+      pub_key = FontsDotCom::Config.public_key
+    end
+
+    def priv_key
+      priv_key = FontsDotCom::Config.private_key
     end
   end
 end

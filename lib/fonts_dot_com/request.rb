@@ -30,49 +30,22 @@ module FontsDotCom
       @auth_param = FontsDotCom::AuthParam.create @message
       
       # Set request headers
-      @request['Authorization'] = @auth_param
-      @request['AppKey'] = FontsDotCom::Config.app_key
-
-      # TODO
-      #
-      #@request = Typhoeus::Request.new(
-      #  base_uri,
-      #  method: :post,
-      #  body: @request_params
-      #)
+      @request['authorization'] = @auth_param
+      @request['appKey'] = FontsDotCom::Config.app_key
     end
 
     def run(attempted_authentication=false)
-      #maybe_say "about to 'run' this request: \n#{request.inspect}\n"
-      #res = request.run
-
       res = Net::HTTP.start(uri.hostname, uri.port) {|http| http.request(@request) }
 
-      # TODO
-      #@response = FontsDotCom::Response.new(res)
-      @response = res
-
-      #maybe_say "response body:"
-      #maybe_say response.body
+      @response = FontsDotCom::Response.new(res)
 
       return @response
     end
 
     private
-
-    def format_bulk_params(options)
-      requests = options.fetch(:requests)
-      requests = requests.to_json unless requests.is_a? String
-
-      {
-        sessionKey:   session_key,
-        clientCode:   config[:clientCode],
-        requests:     requests 
-      }
-    end
     
     def base
-      "#{protocol}://api.fonts.com/"
+      "#{protocol}://api.fonts.com"
     end
     
     def base_uri

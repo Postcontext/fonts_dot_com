@@ -7,24 +7,48 @@ module FontsDotCom
       self.new(options).run
     end
    
-    attr_accessor :request, :message, :uri, :original_options
+    attr_accessor :request, 
+                  :message, 
+                  :method, 
+                  :uri, 
+                  :query_params, 
+                  :data_params, 
+                  :original_options
     
     def initialize(options={})
       set_up(options)
     end
 
     def set_up(options={})
+      @original_options = options
+      
+      # Process options
+
       if options.is_a? String
         @message = options
       else
-        @message = options[:message]
+        @message      = options[:message]
+        @method       = ( options[:method] || :get).to_sym
+        @data_params  = options[:data]
+        @query_params = options[:query]
       end
 
-      @original_options = options
+      raise ArgumentError unless allowed_http_verbs.include? @method
+
+
 
       @uri = URI(base + message)
 
-      @request = Net::HTTP::Get.new(uri)
+      case method
+      when :get
+        @request = Net::HTTP::Get.new(uri)
+      when :post
+        @request = Net::HTTP::Post.new(uri)
+      when :put
+        @request = Net::HTTP::Put.new(uri)
+      when :delete
+        @request = Net::HTTP::Delete.new(uri)
+      end
       
       # Compute md5 HMAC for request
       @auth_param = FontsDotCom::AuthParam.create @message
@@ -32,6 +56,14 @@ module FontsDotCom
       # Set request headers
       @request['authorization'] = @auth_param
       @request['appKey'] = FontsDotCom::Config.app_key
+
+      # Set form data
+      @request.set_form_data(data_params) if data_params
+      
+      # Set query params 
+      # TODO
+
+      @request
     end
 
     def run(attempted_authentication=false)
@@ -62,6 +94,10 @@ module FontsDotCom
     
     def format
       'json' #TODO make settable?
+    end
+
+    def allowed_http_verbs
+      [:get, :post, :put, :delete]
     end
   end
 end

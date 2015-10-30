@@ -9,7 +9,9 @@ module FontsDotCom
   class << self
 
     ##
+    #
     # Projects
+    #
     ##
     
     # http://www.fonts.com/web-fonts/developers/api/list-projects
@@ -51,6 +53,24 @@ module FontsDotCom
       })
     end
 
+
+
+    ###
+    # 
+    # Project Fonts
+    #
+    ###
+
+    def list_project_fonts(project_id)
+      # `project_id` should be fonts.com's project ID (returned as
+      # `ProjectKey` by the API.)
+      raise ArgumentError unless project_id
+      
+      response = FontsDotCom::Request.fire({
+        message:  "/rest/json/Fonts/?wfspid=#{project_id}",
+        method:   :get
+      })
+    end
 
   end
 

@@ -9,6 +9,8 @@ module FontsDotCom
       def initialize(response)
         @response = response
       end
+
+      class AuthenticationFailed; end
     end
 
     attr_accessor :original_response_object, :body, :code

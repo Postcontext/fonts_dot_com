@@ -2,20 +2,13 @@ require 'yaml'
 
 module FontsDotCom
   module Config
-    
-    CONFIG = YAML.load_file('../../config/fonts_dot_com.yml')
 
     class << self
-      def public_key
-        @public_key ||= CONFIG['public_key']
-      end
-
-      def private_key
-        @private_key ||= CONFIG['private_key']
-      end
-
-      def api_key
-        @api_key ||= CONFIG['api_key']
+     
+      attr_accessor :public_key, :private_key, :api_key
+      
+      def configure
+        yield self
       end
 
       def app_key

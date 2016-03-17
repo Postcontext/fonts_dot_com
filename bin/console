@@ -3,12 +3,23 @@
 require "bundler/setup"
 require "fonts_dot_com"
 
-# You can add fixtures and/or initialization code here to make experimenting
-# with your gem easier. You can also use a different console, if you like.
+# Feel free to change these if you'd like to store your config file(s)
+# somewhere else.
+config_dir      = './config/'
+config_filename = 'fonts_dot_com.yml'
 
-# (If you use this, don't forget to add pry to your Gemfile!)
-# require "pry"
-# Pry.start
+config_file     = config_dir + config_filename
+
+if Dir.exists?(config_dir) && File.exists?(config_file)
+
+  CONFIG = YAML.load_file(config_file)
+  
+  FontsDotCom.configure do |config|
+    config.public_key   = CONFIG['public_key']
+    config.private_key  = CONFIG['private_key']
+    config.api_key      = CONFIG['api_key']
+  end
+end
 
 require "irb"
 IRB.start

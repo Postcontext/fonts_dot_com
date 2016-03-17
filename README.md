@@ -1,8 +1,6 @@
 # FontsDotCom
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/fonts_dot_com`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+This is a simple wrapper for communicating with the fonts.com API. The fonts.com API requires signing calls with a hash that's not trivial to generate, which rules out e.g. playing around with curl. 
 
 ## Installation
 
@@ -22,17 +20,47 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+### API key
 
-## Development
+Before you can use the fonts.com API, you need an API key. You can request a key here:
+https://www.fonts.com/web-fonts/developers/request-api-key
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `bin/console` for an interactive prompt that will allow you to experiment.
+### Configuration
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release` to create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+`FontsDotCom` needs to be configured with your credentials before you can make API calls. 
+
+```ruby
+irb> require 'fonts_dot_com'
+irb> FontsDotCom.configure do |config|
+irb>   config.api_key      = 'whatever'
+irb>   config.public_key   = 'whatever' # This, and the private key are generated
+irb>   config.private_key  = 'whatever' # from the API key.
+irb> end
+
+```
+In a Rails app, you'd want to put the above in an initializer.
+
+### API calls
+
+Until I write up some better documentation, here's the gist:
+
+```ruby
+response = FontsDotCom::Api.list_projects
+=> #<FontsDotCom::Response:0x007fdfdc1db2d0 @original_response_object=#<Net::HTTPOK 200 OK readbody=true>, @body={ :lots => :here }, @code="200">
+irb> response.class
+=> FontsDotCom::Response
+irb> response.body.class
+=> Hash
+irb> response.body.keys
+=> ["Projects"]
+```
+
+See lib/fonts_dot_com/api.rb for other calls.
+
 
 ## Contributing
 
-1. Fork it ( https://github.com/[my-github-username]/fonts_dot_com/fork )
+1. Fork it ( https://github.com/Postcontext/fonts_dot_com/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
 3. Commit your changes (`git commit -am 'Add some feature'`)
 4. Push to the branch (`git push origin my-new-feature`)
